@@ -107,10 +107,14 @@ def lint_wiki(wiki_dir: Path, errors_only: bool = False,
         if fm.get("trust") == "llm-distilled" and "approved" not in fm:
             errors.append({"file": str(rel), "level": "error",
                            "msg": "trust: llm-distilled 必須帶 approved 欄位（true/false 皆可，但要表態）"})
-        if fm.get("approved") is False and fm.get("status") not in (None, "seedling"):
+        # [2026-09-04 放寬] 原規則是「approved:false 只能是 seedling」，
+        # 但實測 paddy-bot 的 hoyeah 知識庫有 96 頁是 llm-distilled + developing ——
+        # **`developing` 是有意義的成熟度資訊，強制降成 seedling 會把它毀掉**。
+        # 規則的本意是「未審核的內容不可看起來像權威」，那只需要擋 `mature`。
+        if fm.get("approved") is False and fm.get("status") == "mature":
             errors.append({"file": str(rel), "level": "error",
-                           "msg": f"approved: false 的頁面 status 只能是 seedling"
-                                  f"（現為 {fm.get('status')}）"})
+                           "msg": "approved: false 的頁面不可標 status: mature"
+                                  "（未經人工審核不該看起來像權威；developing 可以）"})
 
         # ── tags 受控詞彙（--schema 給了才驗）
         if whitelist is not None:

@@ -233,11 +233,18 @@ def test_lint_llm_distilled_needs_approved(kb):
     assert any("approved" in e["msg"] for e in payload["errors"])
 
 
-def test_lint_unapproved_must_stay_seedling(kb):
-    """AC: AC-019 — approved:false 卻標 mature → error（未審核不可被當成已確認）"""
+def test_lint_unapproved_cannot_be_mature(kb):
+    """AC: AC-019 — approved:false 標 mature → error；標 developing → 不 error（2026-09-04 放寬）"""
     _write_page(kb, "premature", "trust: llm-distilled\napproved: false\n", status="mature")
     payload = as_json(run("wiki_lint.py", "--wiki_dir", str(kb / "wiki"), "--json"))
-    assert any("seedling" in e["msg"] for e in payload["errors"])
+    assert any("mature" in e["msg"] for e in payload["errors"])
+
+    # developing 是有意義的成熟度 —— 未審核不代表沒進展，不該被強制降成 seedling
+    (kb / "wiki" / "premature.md").unlink()
+    _write_page(kb, "in-progress", "trust: llm-distilled\napproved: false\n",
+                status="developing")
+    payload = as_json(run("wiki_lint.py", "--wiki_dir", str(kb / "wiki"), "--json"))
+    assert not [e for e in payload["errors"] if "mature" in e["msg"]]
 
 
 def test_lint_tag_whitelist_and_exit_code(kb):

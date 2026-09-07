@@ -91,8 +91,8 @@ updated: {TODAY}
 | deterministic | 人工撰寫或由確定式流程產出 | 不需要 |
 | llm-distilled | 模型蒸餾產出 | **必填**（true/false 皆可，但要表態） |
 
-> `approved: false` 的頁面 **status 只能是 seedling** ——
-> 未審核的內容一旦標成 developing/mature，下游引用時就不會再懷疑它。
+> `approved: false` 的頁面 **不可標 `status: mature`**（seedling/developing 皆可）——
+> 未審核的內容標成 mature，下游引用時就不會再懷疑它。
 > `wiki_context.py` 會在注入時為它加上 ⚠。
 
 ## Frontmatter 必填欄位

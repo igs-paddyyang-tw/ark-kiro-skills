@@ -60,10 +60,15 @@ aliases: [別名1, 別名2]          # 選填，但強烈建議
 兩條由 `wiki_lint.py` 強制：
 
 1. `trust: llm-distilled` 未帶 `approved` → **error**
-2. `approved: false` 的頁面 **`status` 只能是 `seedling`** → 否則 error
+2. `approved: false` 的頁面 **不可標 `status: mature`** → 否則 error
+   （`seedling`／`developing` 皆可）
 
-> 🔴 第 2 條的理由：未審核的內容一旦標成 `developing`／`mature`，
-> 下游引用時就不會再懷疑它。`wiki_context.py` 注入時會為它加上 ⚠。
+> 🔴 第 2 條的理由：未審核的內容標成 `mature` 會讓下游引用時不再懷疑它。
+> `wiki_context.py` 注入時一律為它加上 ⚠。
+>
+> ⚠️ **2026-09-04 放寬**：原規則是「只能 `seedling`」。實測有 96 頁是
+> `llm-distilled` + `developing` —— **`developing` 是有意義的成熟度資訊，
+> 強制降級會毀掉它**。規則本意只需要擋 `mature`。
 
 ## aliases 為什麼重要
 
