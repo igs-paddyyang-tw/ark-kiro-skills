@@ -146,13 +146,26 @@ def lint_wiki(wiki_dir: Path, errors_only: bool = False,
             all_inbound[link] = all_inbound.get(link, 0) + 1
 
     # Pass 2: 斷裂 wikilink + 孤立頁面
+    # [2026-09-04 降級 error → warning]
+    #
+    # 指向尚未建立的頁面是 wiki 的**正常成長狀態**（red link），不是缺陷 ——
+    # 它壞不了任何工具，而且是「蒸餾時就知道該有這頁」的需求訊號。
+    #
+    # 實測 paddy-bot 的 hoyeah 知識庫：144 筆斷裂連結指向 45 個頁，
+    # 其中 **25 個被 3 頁以上引用** = 真的知識缺口。把它們當 error 的後果是
+    # lint 永遠紅、CI 掛不上，而 144 筆在 v2 時代累積數月無人處理 ——
+    # 那正是本 repo 記過的「常駐假警報的代價不是雜訊，是維運開始習慣性忽略該檢查」。
+    #
+    # error 保留給**破壞工具契約**的問題（缺必填欄位、trust 語意違規、tag 不在白名單）。
+    # 缺口清單改由 wiki_graph.py 的 broken_links 與缺口報告提供。
     for page_name, targets in all_outbound.items():
         for target in targets:
             if target not in all_pages:
-                errors.append({
+                warnings.append({
                     "file": str(all_pages[page_name].relative_to(wiki_dir)),
-                    "level": "error",
+                    "level": "warning",
                     "msg": f"斷裂 wikilink：[[{target}]] 指向不存在的頁面"
+                            f"（red link —— 若被多頁引用代表真的該建這一頁）"
                 })
 
     if not errors_only:

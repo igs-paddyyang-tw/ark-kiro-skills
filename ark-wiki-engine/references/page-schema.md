@@ -86,6 +86,8 @@ aliases 同時會寫進 `.index/userdict.txt` 供 jieba 分詞，避免複合詞
 ## wikilink
 
 - 雙向連結：`[[page_name]]`（不含 `.md`、不含路徑）
+- **指向尚未建立的頁面是允許的**（red link）—— `wiki_lint` 報 warning 不報 error。
+  被多頁引用的 red link 就是該建的頁；error 只保留給破壞工具契約的問題
 - 支援顯示文字：`[[target|顯示文字]]`
 - `[[link]]` 的內容可以是 slug（`retention-definition`）或 page_id（`kpi/retention-definition`），兩者都會被解析
 - L3 圖譜層用 `.index/graph.json` 的 1-hop 出／入鄰居擴散 ——
